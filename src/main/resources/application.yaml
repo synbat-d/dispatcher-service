@@ -4,8 +4,19 @@ server:
 spring:
   application:
     name: dispatcher-service
-
+  config:
+    import: "optional:configserver:"
   cloud:
+    config:
+      uri: http://localhost:8888
+      request-connect-timeout: 5000 # 5s
+      request-read-timeout: 5000 # 5s
+      fail-fast: false # In production, set to true
+      retry:
+        max-attempts: 6
+        initial-interval: 1000 # 1s
+        max-interval: 2000 # 2s
+        multiplier: 1.1
     function:
       definition: pack|label
     stream:
@@ -15,7 +26,6 @@ spring:
           group: ${spring.application.name}
         packlabel-out-0:
           destination: order-dispatched
-
   rabbitmq:
     host: localhost
     port: 5672
@@ -23,17 +33,31 @@ spring:
     password: password
     connection-timeout: 5s
 
+logging:
+  pattern:
+    level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"
+
+info:
+  system: Polar Bookshop
+
 management:
   endpoints:
     web:
       exposure:
-        include: refresh, health, prometheus
+        include: bindings, configprops, env, functions, health, heapdump, info, loggers, mappings, prometheus
   endpoint:
     health:
       show-details: always
       show-components: always
       probes:
         enabled: true
+  info:
+    env:
+      enabled: true
+    java:
+      enabled: true
+    os:
+      enabled: true
   metrics:
     tags:
       application: ${spring.application.name}
