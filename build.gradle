@@ -60,3 +60,7 @@ tasks.register('copyAgent', Copy) {
 tasks.named('bootJar') {
 	dependsOn tasks.named('copyAgent')
 }
+
+tasks.named('jar') {
+	enabled = false
+}
